@@ -67,7 +67,7 @@ class SomeImportantManagerClass {
         $this->logger->info('Im in!');
 
         $foo = $this->doSomethingImportant($importantParameter);
-        $this->logger->info('I just done something important! :sunglasses:', ['foo' => $foo]);
+        $this->logger->info('I just done something important!', ['foo' => $foo]);
 
         if($foo > 1) {
             $result = $this->doSomeMagicButReallyImportantMagic();
@@ -112,7 +112,7 @@ class SomeImportantManagerClass {
         $logContext = ['importantParameter' => $importantParameter];
 
         $foo = $this->doSomethingImportant($importantParameter);
-        $logMessage .= "I just done something important! :sunglasses:\n";
+        $logMessage .= "I just done something important!\n";
         $logContext['foo'] = $foo;
 
         if($foo > 1) {
@@ -153,7 +153,7 @@ class SomeImportantManagerClass
         $workflow->info('Im in!');
 
         $foo = $this->doSomethingImportant($importantParameter);
-        $workflow->info('I just done something important! :sunglasses:', ['foo' => $foo]);
+        $workflow->info('I just done something important!', ['foo' => $foo]);
 
         if($foo > 1) {
             $result = $this->doSomeMagicButReallyImportantMagic();
@@ -186,7 +186,7 @@ $someImportantManagerClass->doSomeImportantJob($someImportantVariable);
 
 Workflow: Some important workflow
 [2017-10-02 01:52:20.388575] INFO: Im in!
-[2017-10-02 01:52:20.388633] INFO: I just done something important! :sunglasses:
+[2017-10-02 01:52:20.388633] INFO: I just done something important!
 Context:
 [
   "foo" => 2
