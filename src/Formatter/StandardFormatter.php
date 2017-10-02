@@ -27,19 +27,24 @@ class StandardFormatter implements FormatterInterface
         $this->dumper = $dumper;
     }
 
-    public function format(Record $record)
+    protected function prepareContextPart(Record $record)
     {
-        $contextString = '';
+        $context = $record->getContext();
 
-        if ($context = $record->getContext()) {
-            $contextString = strtr(
-              static::CONTEXT_FORMAT,
-              [
-                '%context%' => $this->dumper->dump($context),
-              ]
-            );
+        if (empty($context)) {
+            return '';
         }
 
+        return strtr(
+          static::CONTEXT_FORMAT,
+          [
+            '%context%' => $this->dumper->dump($context),
+          ]
+        );
+    }
+
+    public function format(Record $record)
+    {
         $string = strtr(
           static::FORMAT,
           [
@@ -48,7 +53,7 @@ class StandardFormatter implements FormatterInterface
             ),
             '%level%' => $record->getLevel(),
             '%message%' => $record->getMessage(),
-            '%contextPlaceholder%' => $contextString,
+            '%contextPlaceholder%' => $this->prepareContextPart($record),
           ]
         );
 
