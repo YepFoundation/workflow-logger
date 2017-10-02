@@ -4,6 +4,7 @@ namespace Yep\WorkflowLogger;
 
 use Psr\Log\LoggerInterface as PsrLoggerInterface;
 use Yep\WorkflowLogger\Exception\LevelIsNotDefinedException;
+use Yep\WorkflowLogger\Exception\WorkflowIsLockedException;
 use Yep\WorkflowLogger\Formatter\FormatterInterface;
 
 /**
@@ -55,11 +56,6 @@ class Workflow implements PsrLoggerInterface
     protected $logger;
 
     /**
-     * @var string
-     */
-    protected $name;
-
-    /**
      * @var array|Record[]
      */
     protected $records = [];
@@ -70,25 +66,27 @@ class Workflow implements PsrLoggerInterface
     protected $timezone;
 
     /**
+     * @var bool
+     */
+    protected $locked = false;
+
+    /**
      * Workflow constructor.
      *
      * @param PsrLoggerInterface $logger    Main logger
      * @param FormatterInterface $formatter Workflow records formatter
      * @param \DateTimeZone      $timezone  Current timezone
-     * @param string             $name      Workflow name
      * @param int|string         $level     Workflow level code
      */
     public function __construct(
       PsrLoggerInterface $logger,
       FormatterInterface $formatter,
       \DateTimeZone $timezone,
-      $name,
       $level
     ) {
         $this->logger = $logger;
         $this->formatter = $formatter;
         $this->timezone = $timezone;
-        $this->name = (string)$name;
         $this->level = $level;
     }
 
@@ -101,14 +99,6 @@ class Workflow implements PsrLoggerInterface
         $time->setTimezone($this->timezone);
 
         return $time;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
     }
 
     /**
@@ -136,16 +126,38 @@ class Workflow implements PsrLoggerInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isLocked()
+    {
+        return $this->locked;
+    }
+
+    /**
+     * @return void
+     */
+    public function lock()
+    {
+        $this->locked = true;
+    }
+
+    /**
      * Logs with a workflow level and with all workflow records
      *
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
+     * @throws WorkflowIsLockedException
      */
     public function finish($message = '', array $context = [])
     {
+        if ($this->isLocked()) {
+            throw WorkflowIsLockedException::create();
+        }
+
+        $this->lock();
         $message .= $message === '' ? '' : "\n\n";
-        $message .= "Workflow: {$this->getName()}\n";
+        $message .= "Workflow:\n";
 
         foreach ($this->records as $record) {
             $message .= $this->formatter->format($record);
@@ -161,10 +173,15 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
      */
     public function log($level, $message, array $context = [])
     {
+        if ($this->isLocked()) {
+            throw WorkflowIsLockedException::create();
+        }
+
         $this->records[] = new Record(
           $this->getCurrentDateTime(),
           $message,
@@ -179,11 +196,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function emergency($message, array $context = [])
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(static::EMERGENCY, $message, $context);
     }
 
     /**
@@ -195,11 +213,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function alert($message, array $context = [])
     {
-        $this->log(self::ALERT, $message, $context);
+        $this->log(static::ALERT, $message, $context);
     }
 
     /**
@@ -210,11 +229,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function critical($message, array $context = [])
     {
-        $this->log(self::CRITICAL, $message, $context);
+        $this->log(static::CRITICAL, $message, $context);
     }
 
     /**
@@ -224,11 +244,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function error($message, array $context = [])
     {
-        $this->log(self::ERROR, $message, $context);
+        $this->log(static::ERROR, $message, $context);
     }
 
     /**
@@ -240,11 +261,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function warning($message, array $context = [])
     {
-        $this->log(self::WARNING, $message, $context);
+        $this->log(static::WARNING, $message, $context);
     }
 
     /**
@@ -253,11 +275,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function notice($message, array $context = [])
     {
-        $this->log(self::NOTICE, $message, $context);
+        $this->log(static::NOTICE, $message, $context);
     }
 
     /**
@@ -268,11 +291,12 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function info($message, array $context = [])
     {
-        $this->log(self::INFO, $message, $context);
+        $this->log(static::INFO, $message, $context);
     }
 
     /**
@@ -281,10 +305,11 @@ class Workflow implements PsrLoggerInterface
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
-     * @throws \Yep\WorkflowLogger\Exception\LevelIsNotDefinedException
+     * @throws WorkflowIsLockedException
+     * @throws LevelIsNotDefinedException
      */
     public function debug($message, array $context = [])
     {
-        $this->log(self::DEBUG, $message, $context);
+        $this->log(static::DEBUG, $message, $context);
     }
 }

@@ -11,8 +11,8 @@ namespace Yep\WorkflowLogger;
 interface LoggerInterface extends \Psr\Log\LoggerInterface
 {
     /**
-     * @param string $name
+     * @param string|null $key
      * @return Workflow
      */
-    public function workflow($name);
+    public function workflow($key = null);
 }

@@ -149,7 +149,7 @@ class SomeImportantManagerClass
 
     public function doSomeImportantJob($importantParameter)
     {
-        $workflow = $this->logger->workflow('Some important workflow');
+        $workflow = $this->logger->workflow();
         $workflow->info('Im in!');
 
         $foo = $this->doSomethingImportant($importantParameter);
@@ -184,7 +184,7 @@ $someImportantManagerClass->doSomeImportantJob($someImportantVariable);
 ```
 [2017-10-02 01:52:20] ImportantLogger.WORKFLOW: Finished one of many important workflows
 
-Workflow: Some important workflow
+Workflow:
 [2017-10-02 01:52:20.388575] INFO: Im in!
 [2017-10-02 01:52:20.388633] INFO: I just done something important!
 Context:
@@ -203,5 +203,11 @@ Context:
 ```
 
 Reaction: :flushed: :scream:
+
+
+### Hint
+You can use the same workflow more times until is locked during finish or manually by lock method.<br>
+If you want to get the same workflow just call `$logger->workflow($key)` with `key` as the first argument.<br>
+Every time you will call that method, logger will give you the same workflow until is locked. :sunglasses:
 
 > That's all. I hope you like it. :kissing_smiling_eyes:

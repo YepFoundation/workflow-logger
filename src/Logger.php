@@ -2,6 +2,7 @@
 
 namespace Yep\WorkflowLogger;
 
+use Yep\WorkflowLogger\Exception\WorkflowIsLockedException;
 use Yep\WorkflowLogger\Formatter\FormatterInterface;
 
 /**
@@ -32,6 +33,11 @@ class Logger extends \Monolog\Logger implements LoggerInterface
     ];
 
     /**
+     * @var array|Workflow[]
+     */
+    protected $workflows = [];
+
+    /**
      * Logger constructor.
      *
      * @param string             $name
@@ -46,14 +52,27 @@ class Logger extends \Monolog\Logger implements LoggerInterface
       $processors = []
     ) {
         parent::__construct($name, $handlers, $processors);
-        self::$levels += parent::$levels;
+        static::$levels += parent::$levels;
         $this->workflowFormatter = $formatter;
+    }
+
+    /**
+     * @return Workflow
+     */
+    protected function createWorkflow()
+    {
+        return new Workflow(
+          $this,
+          $this->workflowFormatter,
+          $this->getDateTimeZone(),
+          static::WORKFLOW
+        );
     }
 
     /**
      * @return \DateTimeZone
      */
-    protected function timezoneFactory()
+    protected function getDateTimeZone()
     {
         if (static::$timezone) {
             return static::$timezone;
@@ -65,17 +84,24 @@ class Logger extends \Monolog\Logger implements LoggerInterface
     }
 
     /**
-     * @param string $name
+     * @param string|null $key
      * @return Workflow
+     * @throws WorkflowIsLockedException
      */
-    public function workflow($name)
+    public function workflow($key = null)
     {
-        return new Workflow(
-          $this,
-          $this->workflowFormatter,
-          $this->timezoneFactory(),
-          $name,
-          static::WORKFLOW
-        );
+        if ($key === null) {
+            return $this->createWorkflow();
+        }
+
+        if (!isset($this->workflows[$key])) {
+            $this->workflows[$key] = $this->createWorkflow();
+        }
+
+        if ($this->workflows[$key]->isLocked()) {
+            throw WorkflowIsLockedException::create($key);
+        }
+
+        return $this->workflows[$key];
     }
 }

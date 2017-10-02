@@ -4,6 +4,7 @@ namespace Tests\Yep\WorkflowLogger;
 
 use Yep\Reflection\ReflectionClass;
 use Yep\WorkflowLogger\Exception\LevelIsNotDefinedException;
+use Yep\WorkflowLogger\Exception\WorkflowIsLockedException;
 use Yep\WorkflowLogger\Formatter\FormatterInterface;
 use Yep\WorkflowLogger\LoggerInterface;
 use Yep\WorkflowLogger\Record;
@@ -22,11 +23,10 @@ class WorkflowTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $name
-     * @param int    $level
+     * @param int $level
      * @return Workflow
      */
-    protected function createWorkflow($name = 'foo', $level = 987)
+    protected function createWorkflow($level = 987)
     {
         /** @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject $logger */
         $logger = $this->createMock(LoggerInterface::class);
@@ -35,18 +35,17 @@ class WorkflowTest extends \PHPUnit_Framework_TestCase
         $formatter = $this->createMock(FormatterInterface::class);
         $timezone = $this->createTimezone();
 
-        return new Workflow($logger, $formatter, $timezone, $name, $level);
+        return new Workflow($logger, $formatter, $timezone, $level);
     }
 
     public function testLogMethodsAndSendMethod()
     {
-        $name = 'foo';
         $level = 123;
         $sendMessage = 'Problem during something';
         $context = ['bar' => true];
         $message = $sendMessage.'
 
-Workflow: '.$name.'
+Workflow:
 ';
         //           call         message      context
         $calls[] = ['emergency', 'Emergency', ['dump' => 'emergency']];
@@ -135,7 +134,7 @@ Workflow: '.$name.'
           ->willReturn(1);
 
         $timezone = $this->createTimezone();
-        $workflow = new Workflow($logger, $formatter, $timezone, $name, $level);
+        $workflow = new Workflow($logger, $formatter, $timezone, $level);
 
         // Add extra level ↓
         $reflection = ReflectionClass::from($workflow);
@@ -152,6 +151,18 @@ Workflow: '.$name.'
 
         $workflow->log($extraLevelKey, $extraMessage, $extraContext);
         $workflow->finish($sendMessage, $context);
+    }
+
+    public function testLogWithWrongLevel()
+    {
+        /** @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject $logger */
+        $logger = $this->createMock(LoggerInterface::class);
+
+        /** @var FormatterInterface|\PHPUnit_Framework_MockObject_MockObject $formatter */
+        $formatter = $this->createMock(FormatterInterface::class);
+
+        $timezone = $this->createTimezone();
+        $workflow = new Workflow($logger, $formatter, $timezone, 1);
 
         $this->expectException(LevelIsNotDefinedException::class);
         $workflow->log('wrong level key', '');
@@ -173,17 +184,10 @@ Workflow: '.$name.'
         $this->assertNotSame($datetime, $datetimeB);
     }
 
-    public function testGetName()
-    {
-        $name = 'foo';
-        $workflow = $this->createWorkflow($name);
-        $this->assertSame($name, $workflow->getName());
-    }
-
     public function testGetLevel()
     {
-        $level = 987;
-        $workflow = $this->createWorkflow('foo', $level);
+        $level = 456;
+        $workflow = $this->createWorkflow($level);
         $this->assertSame($level, $workflow->getLevel());
     }
 
@@ -200,5 +204,29 @@ Workflow: '.$name.'
 
         $this->expectException(LevelIsNotDefinedException::class);
         $workflow->getLevelName('wrong level key');
+    }
+
+    public function testLock()
+    {
+        $workflow = $this->createWorkflow();
+        $this->assertFalse($workflow->isLocked());
+        $workflow->lock();
+        $this->assertTrue($workflow->isLocked());
+    }
+
+    public function testLogWithLock()
+    {
+        $workflow = $this->createWorkflow();
+        $workflow->lock();
+        $this->expectException(WorkflowIsLockedException::class);
+        $workflow->log(Workflow::ERROR, 'foo');
+    }
+
+    public function testFinishWithLock()
+    {
+        $workflow = $this->createWorkflow();
+        $workflow->lock();
+        $this->expectException(WorkflowIsLockedException::class);
+        $workflow->finish();
     }
 }

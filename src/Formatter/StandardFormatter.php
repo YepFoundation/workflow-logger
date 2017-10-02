@@ -33,7 +33,7 @@ class StandardFormatter implements FormatterInterface
 
         if ($context = $record->getContext()) {
             $contextString = strtr(
-              self::CONTEXT_FORMAT,
+              static::CONTEXT_FORMAT,
               [
                 '%context%' => $this->dumper->dump($context),
               ]
@@ -41,7 +41,7 @@ class StandardFormatter implements FormatterInterface
         }
 
         $string = strtr(
-          self::FORMAT,
+          static::FORMAT,
           [
             '%datetime%' => $record->getDatetime()->format(
               static::DATETIME_FORMAT
