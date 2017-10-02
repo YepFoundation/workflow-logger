@@ -1,0 +1,43 @@
+{
+  "name": "yep/workflow-logger",
+  "license": [
+    "BSD-3-Clause",
+    "GPL-2.0",
+    "GPL-3.0"
+  ],
+  "description": "Workflow logger",
+  "keywords": [
+    "logger",
+    "log",
+    "logging",
+    "workflow"
+  ],
+  "homepage": "https://github.com/YepFoundation/workflow-logger",
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Martin Zeman (Zemistr)",
+      "homepage": "http://zemistr.eu"
+    }
+  ],
+  "require": {
+    "php": ">=5.6",
+    "monolog/monolog": "^1.5"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5",
+    "tracy/tracy": "^2.3",
+    "symfony/var-dumper": "^3.2",
+    "yep/reflection": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Yep\\WorkflowLogger\\": "src",
+      "Tests\\Yep\\WorkflowLogger\\": "tests"
+    }
+  },
+  "suggest": {
+    "tracy/tracy": "To use TracyDumper install tracy/tracy=^2.3",
+    "symfony/var-dumper": "To use SymfonyVarDumper install symfony/var-dumper=^3.2"
+  }
+}
