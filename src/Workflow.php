@@ -42,7 +42,7 @@ class Workflow implements PsrLoggerInterface
     /**
      * @var int|string
      */
-    private $level;
+    protected $level;
 
     /**
      * @var FormatterInterface
