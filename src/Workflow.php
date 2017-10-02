@@ -157,7 +157,7 @@ class Workflow implements PsrLoggerInterface
     /**
      * Logs workflow record with an arbitrary level.
      *
-     * @param  int    $level   The logging level
+     * @param  string $level   The logging level
      * @param  string $message The log message
      * @param  array  $context The log context
      * @return void
