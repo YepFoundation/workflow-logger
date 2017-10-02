@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Yep\WorkflowLogger;
+
 use Yep\WorkflowLogger\Record;
 
 /**
@@ -7,11 +9,11 @@ use Yep\WorkflowLogger\Record;
  *
  * @author Martin Zeman (Zemistr) <me@zemistr.eu>
  */
-class RecordTest extends PHPUnit_Framework_TestCase
+class RecordTest extends \PHPUnit_Framework_TestCase
 {
     public function testAll()
     {
-        $datetime = new DateTime();
+        $datetime = new \DateTime();
         $message = 'foo';
         $level = 'level';
         $context = ['bar'];

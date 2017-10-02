@@ -14,7 +14,7 @@ just add the dependency to your composer.json.
 ```json
 {
   "require" : {
-    "yep/workflow-logger": "^1.0"
+    "yep/workflow-logger": "^1.2"
   }
 }
 ```
@@ -205,9 +205,10 @@ Context:
 Reaction: :flushed: :scream:
 
 
-### Hint
-You can use the same workflow more times until is locked during finish or manually by lock method.<br>
+### Hints
+* You can use the same workflow more times until is locked during finish or manually by lock method.<br>
 If you want to get the same workflow just call `$logger->workflow($key)` with `key` as the first argument.<br>
 Every time you will call that method, logger will give you the same workflow until is locked. :sunglasses:
+* If you want to use `\Monolog\Formatter\ChromePHPFormatter`, `\Monolog\Formatter\GelfMessageFormatter`, `\Monolog\Formatter\WildfireFormatter` or similar with freezed log Levels, you have to use `\Yep\WorkflowLogger\MonologFormatterAdapter`.
 
 > That's all. I hope you like it. :kissing_smiling_eyes:
