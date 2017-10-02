@@ -95,7 +95,19 @@ class Workflow implements PsrLoggerInterface
      */
     protected function getCurrentDateTime()
     {
-        $time = new \DateTime(null, $this->timezone);
+        // php7.1+ always has microseconds enabled, so we do not need this hack
+        if (PHP_VERSION_ID < 70100) {
+            $microtime = sprintf('%.6F', microtime(true));
+            $time = \DateTime::createFromFormat(
+              'U.u',
+              $microtime,
+              $this->timezone
+            );
+        }
+        else {
+            $time = new \DateTime(null, $this->timezone);
+        }
+
         $time->setTimezone($this->timezone);
 
         return $time;
