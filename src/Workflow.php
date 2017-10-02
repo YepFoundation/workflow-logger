@@ -2,7 +2,7 @@
 
 namespace Yep\WorkflowLogger;
 
-use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface as PsrLoggerInterface;
 use Yep\WorkflowLogger\Exception\LevelIsNotDefinedException;
 use Yep\WorkflowLogger\Formatter\FormatterInterface;
 
@@ -12,7 +12,7 @@ use Yep\WorkflowLogger\Formatter\FormatterInterface;
  * @package Yep\WorkflowLogger
  * @author  Martin Zeman (Zemistr) <me@zemistr.eu>
  */
-class Workflow implements LoggerInterface
+class Workflow implements PsrLoggerInterface
 {
     const EMERGENCY = 'emergency';
     const ALERT = 'alert';
@@ -72,14 +72,14 @@ class Workflow implements LoggerInterface
     /**
      * Workflow constructor.
      *
-     * @param LoggerInterface    $logger    Main logger
+     * @param PsrLoggerInterface $logger    Main logger
      * @param FormatterInterface $formatter Workflow records formatter
      * @param \DateTimeZone      $timezone  Current timezone
      * @param string             $name      Workflow name
      * @param int|string         $level     Workflow level code
      */
     public function __construct(
-      LoggerInterface $logger,
+      PsrLoggerInterface $logger,
       FormatterInterface $formatter,
       \DateTimeZone $timezone,
       $name,
