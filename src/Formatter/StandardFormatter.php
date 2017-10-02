@@ -18,13 +18,19 @@ class StandardFormatter implements FormatterInterface
     const DATETIME_FORMAT = 'Y-m-d H:i:s.u';
 
     /**
+     * @var int
+     */
+    protected $indent;
+
+    /**
      * @var DumperInterface
      */
     protected $dumper;
 
-    public function __construct(DumperInterface $dumper)
+    public function __construct(DumperInterface $dumper, $indent = 0)
     {
         $this->dumper = $dumper;
+        $this->indent = (int)$indent;
     }
 
     protected function prepareContextPart(Record $record)
@@ -35,12 +41,12 @@ class StandardFormatter implements FormatterInterface
             return '';
         }
 
-        return strtr(
-          static::CONTEXT_FORMAT,
-          [
-            '%context%' => $this->dumper->dump($context),
-          ]
-        );
+        $dump = $this->dumper->dump($context);
+        $dump = $this->indent($dump);
+        $string = strtr(static::CONTEXT_FORMAT, ['%context%' => $dump]);
+        $string = $this->indent($string);
+
+        return $string;
     }
 
     public function format(Record $record)
@@ -57,6 +63,25 @@ class StandardFormatter implements FormatterInterface
           ]
         );
 
+        $string = $this->indent($string);
+
         return $string;
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    protected function indent($string)
+    {
+        if ($this->indent === 0) {
+            return $string;
+        }
+
+        return preg_replace(
+          '#(?:^|[\r\n]+)(?=[^\r\n])#',
+          '$0'.str_repeat(' ', $this->indent),
+          $string
+        );
     }
 }

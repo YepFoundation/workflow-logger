@@ -54,4 +54,42 @@ class StandardFormatterTest extends \PHPUnit_Framework_TestCase
           $formatted
         );
     }
+
+    public function testFormatWithIndent()
+    {
+        $datetime = new \DateTime();
+        $message = 'foo';
+        $level = 'level';
+        $context = ['bar'];
+
+        /** @var DumperInterface|\PHPUnit_Framework_MockObject_MockObject $dumper */
+        $dumper = $this->createMock(DumperInterface::class);
+        $dumper->expects($this->exactly(2))
+          ->method('dump')
+          ->willReturn('OK');
+
+        $record = new Record($datetime, $message, $level, $context);
+
+        $formatter = new StandardFormatter($dumper, 1);
+        $formatted = $formatter->format($record);
+
+        $this->assertStringMatchesFormat(
+          ' [%s] level: foo
+  Context:
+   OK
+',
+          $formatted
+        );
+
+        $formatter = new StandardFormatter($dumper, 2);
+        $formatted = $formatter->format($record);
+
+        $this->assertStringMatchesFormat(
+          '  [%s] level: foo
+    Context:
+      OK
+',
+          $formatted
+        );
+    }
 }

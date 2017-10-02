@@ -171,7 +171,7 @@ class SomeImportantManagerClass
 // $dumper = new Yep\WorkflowLogger\ContextDumper\PrintRDumper();
 // $dumper = new Yep\WorkflowLogger\ContextDumper\TracyDumper();
 $dumper = new Yep\WorkflowLogger\ContextDumper\SymfonyVarDumper();
-$formatter = new Yep\WorkflowLogger\Formatter\StandardFormatter($dumper);
+$formatter = new Yep\WorkflowLogger\Formatter\StandardFormatter($dumper, 2);
 $importantLogger = new Yep\WorkflowLogger\Logger('ImportantLogger', $formatter);
 
 $someImportantManagerClass = new SomeImportantManagerClass($importantLogger);
@@ -185,19 +185,19 @@ $someImportantManagerClass->doSomeImportantJob($someImportantVariable);
 [2017-10-02 01:52:20] ImportantLogger.WORKFLOW: Finished one of many important workflows
 
 Workflow:
-[2017-10-02 01:52:20.388575] INFO: Im in!
-[2017-10-02 01:52:20.388633] INFO: I just done something important!
-Context:
-[
-  "foo" => 2
-]
+  [2017-10-02 22:43:46.624555] INFO: Im in!
+  [2017-10-02 22:43:46.624578] INFO: I just done something important! :sunglasses:
+    Context:
+      [
+        "foo" => 2
+      ]
 
-[2017-10-02 01:52:20.388643] ALERT: Abracadabra #copperfield
-Context:
-[
-  "result" => "Alohomora"
-  "foo" => 2
-]
+  [2017-10-02 22:43:46.624591] ALERT: Abracadabra #copperfield
+    Context:
+      [
+        "result" => "Alohomora"
+        "foo" => 2
+      ]
 
  {"nextStep":"improve!"} []
 ```
@@ -210,5 +210,6 @@ Reaction: :flushed: :scream:
 If you want to get the same workflow just call `$logger->workflow($key)` with `key` as the first argument.<br>
 Every time you will call that method, logger will give you the same workflow until is locked. :sunglasses:
 * If you want to use `\Monolog\Formatter\ChromePHPFormatter`, `\Monolog\Formatter\GelfMessageFormatter`, `\Monolog\Formatter\WildfireFormatter` or similar with freezed log Levels, you have to use `\Yep\WorkflowLogger\MonologFormatterAdapter`.
+* Do you know, that you can indent the workflow message? Yep, you really can. Just use second argument of `Yep\WorkflowLogger\Formatter\StandardFormatter($dumper, $indent)`. :wink:
 
 > That's all. I hope you like it. :kissing_smiling_eyes:
