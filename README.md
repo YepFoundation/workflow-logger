@@ -1,0 +1,207 @@
+[![Build Status](https://travis-ci.org/YepFoundation/workflow-logger.svg?branch=v2)](https://travis-ci.org/YepFoundation/workflow-logger)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/YepFoundation/workflow-logger/badges/quality-score.png?b=v2)](https://scrutinizer-ci.com/g/YepFoundation/workflow-logger/?branch=v2)
+[![Scrutinizer Code Coverage](https://scrutinizer-ci.com/g/YepFoundation/workflow-logger/badges/coverage.png?b=v2)](https://scrutinizer-ci.com/g/YepFoundation/workflow-logger/?branch=v2)
+[![Latest Stable Version](https://poser.pugx.org/yep/workflow-logger/v/stable)](https://packagist.org/packages/yep/workflow-logger)
+[![Total Downloads](https://poser.pugx.org/yep/workflow-logger/downloads)](https://packagist.org/packages/yep/workflow-logger)
+[![License](https://poser.pugx.org/yep/workflow-logger/license)](https://github.com/YepFoundation/workflow-logger/blob/v2/LICENSE.md)
+
+# Workflow logger
+
+## Packagist
+Reflection is available on [Packagist.org](https://packagist.org/packages/yep/workflow-logger),
+just add the dependency to your composer.json.
+
+```json
+{
+  "require" : {
+    "yep/workflow-logger": "^1.0"
+  }
+}
+```
+
+or run Composer command:
+
+```php
+php composer.phar require yep/workflow-logger
+```
+
+## What Yep/WorkflowLogger do?
+It helps to log workflows! :flushed:
+
+### Try to imagine this situation ↓↓↓
+```php
+<?php
+class SomeImportantManagerClass {
+    public function doSomeImportantJob($importantParameter) {
+        $foo = $this->doSomethingImportant($importantParameter);
+
+        if($foo > 1) {
+            $this->doSomeMagicButReallyImportantMagic();
+        }
+    }
+    ...
+}
+
+$someImportantManagerClass = new SomeImportantManagerClass();
+$someImportantVariable = 1;
+
+$someImportantManagerClass->doSomeImportantJob($someImportantVariable);
+```
+
+Question: How do you know, that each method done exactly what you expect?<br>
+Answer: I don't know, but I can add Logger! :blush:<br>
+Reaction: :+1:
+
+### So we will add Monolog\Logger ↓↓↓
+```php
+<?php
+class SomeImportantManagerClass {
+    /** @var Monolog\Logger  */
+    private $logger;
+    
+    public function __construct(Monolog\Logger $logger) {
+        $this->logger = $logger;
+    }
+    
+    public function doSomeImportantJob($importantParameter) {
+        $this->logger->info('Im in!');
+
+        $foo = $this->doSomethingImportant($importantParameter);
+        $this->logger->info('I just done something important! :sunglasses:', ['foo' => $foo]);
+
+        if($foo > 1) {
+            $result = $this->doSomeMagicButReallyImportantMagic();
+            $this->logger->alert('Abracadabra #copperfield', ['result' => $result, 'foo' => $foo]);
+        }
+        else {
+            $this->logger->error('No Abracadabra #sadCopperfield', ['importantParameter' => $importantParameter, 'foo' => $foo]);
+        }
+    }
+    ...
+}
+
+$importantLogger = new Monolog\Logger('ImportantLogger');
+
+$someImportantManagerClass = new SomeImportantManagerClass($importantLogger);
+$someImportantVariable = 1;
+
+$someImportantManagerClass->doSomeImportantJob($someImportantVariable);
+```
+
+Question: How many log items we will have?<br>
+Answer: 3! :yum:<br>
+Reaction: Yes, Correct! :+1:
+
+Question: But what should we do if we want only one log record? :smirk:<br>
+Answer: Dunno... :scream:<br>
+Reaction: Really? So, have a look below! :sunglasses:
+
+### We will "improve" our logging ↓↓↓
+```php
+<?php
+class SomeImportantManagerClass {
+    /** @var Monolog\Logger  */
+    private $logger;
+    
+    public function __construct(Monolog\Logger $logger) {
+        $this->logger = $logger;
+    }
+    
+    public function doSomeImportantJob($importantParameter) {
+        $logMessage = "Im in!\n";
+        $logContext = ['importantParameter' => $importantParameter];
+
+        $foo = $this->doSomethingImportant($importantParameter);
+        $logMessage .= "I just done something important! :sunglasses:\n";
+        $logContext['foo'] = $foo;
+
+        if($foo > 1) {
+            $result = $this->doSomeMagicButReallyImportantMagic();
+            $logMessage .= "Abracadabra #copperfield\n";
+            $logContext['result'] = $result;
+        }
+        else {
+            $logMessage .= "No Abracadabra #sadCopperfield\n";
+        }
+
+        $this->logger->info($logMessage, $logContext);
+    }
+    ...
+}
+```
+
+Question: Much better! What do you think?<br>
+Answer: But but but moooom, in this case I can log these messages only with one type and I don't know, for which one is the context data...<br>
+Reaction: Yop, you are right... :sweat_smile:<br>However, you can use our WorkflowLogger! :bowtie:
+
+### Now the real magic with Yep\WorkflowLogger\Logger! :sunglasses: ↓↓↓
+```php
+<?php
+class SomeImportantManagerClass
+{
+    /** @var Yep\WorkflowLogger\Logger */
+    private $logger;
+
+    public function __construct(Yep\WorkflowLogger\Logger $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function doSomeImportantJob($importantParameter)
+    {
+        $workflow = $this->logger->workflow('Some important workflow');
+        $workflow->info('Im in!');
+
+        $foo = $this->doSomethingImportant($importantParameter);
+        $workflow->info('I just done something important! :sunglasses:', ['foo' => $foo]);
+
+        if($foo > 1) {
+            $result = $this->doSomeMagicButReallyImportantMagic();
+            $workflow->alert('Abracadabra #copperfield', ['result' => $result, 'foo' => $foo]);
+        }
+        else {
+            $workflow->error('No Abracadabra #sadCopperfield', ['importantParameter' => $importantParameter, 'foo' => $foo]);
+        }
+
+        $workflow->finish('Finished one of many important workflows', ['nextStep' => 'improve!']);
+    }
+
+}
+
+// $dumper = new Yep\WorkflowLogger\ContextDumper\PrintRDumper();
+// $dumper = new Yep\WorkflowLogger\ContextDumper\TracyDumper();
+$dumper = new Yep\WorkflowLogger\ContextDumper\SymfonyVarDumper();
+$formatter = new Yep\WorkflowLogger\Formatter\StandardFormatter($dumper);
+$importantLogger = new Yep\WorkflowLogger\Logger('ImportantLogger', $formatter);
+
+$someImportantManagerClass = new SomeImportantManagerClass($importantLogger);
+$someImportantVariable = 1;
+
+$someImportantManagerClass->doSomeImportantJob($someImportantVariable);
+```
+
+##### Log result
+```
+[2017-10-02 01:52:20] ImportantLogger.WORKFLOW: Finished one of many important workflows
+
+Workflow: Some important workflow
+[2017-10-02 01:52:20.388575] INFO: Im in!
+[2017-10-02 01:52:20.388633] INFO: I just done something important! :sunglasses:
+Context:
+[
+  "foo" => 2
+]
+
+[2017-10-02 01:52:20.388643] ALERT: Abracadabra #copperfield
+Context:
+[
+  "result" => "Alohomora"
+  "foo" => 2
+]
+
+ {"nextStep":"improve!"} []
+```
+
+Reaction: :flushed: :scream:
+
+> That's all. I hope you like it. :kissing_smiling_eyes:
