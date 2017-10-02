@@ -50,7 +50,7 @@ class Workflow implements PsrLoggerInterface
     protected $formatter;
 
     /**
-     * @var Logger
+     * @var PsrLoggerInterface
      */
     protected $logger;
 

@@ -30,8 +30,9 @@ class StandardFormatter implements FormatterInterface
     public function format(Record $record)
     {
         $contextString = '';
+        $context = $record->getContext();
 
-        if ($context = $record->getContext()) {
+        if ($context) {
             $contextString = strtr(
               self::CONTEXT_FORMAT,
               [
